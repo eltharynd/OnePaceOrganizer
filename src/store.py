@@ -340,6 +340,8 @@ class OrganizerStore:
         i = len(result)
 
         if i > 1:
+            if ids_only:
+                return result[0]
             for res in result:
                 if not res["archived"]:
                     return res
