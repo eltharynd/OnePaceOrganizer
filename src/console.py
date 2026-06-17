@@ -324,6 +324,7 @@ class Console:
                         ("Set It Myself", False)
                     ]
                 ).run_async()
+                #TODO plex_scan_show_folder
 
         if plex_config_enabled:
             success = await self.run_plex_wizard()

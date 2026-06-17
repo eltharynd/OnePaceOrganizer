@@ -98,6 +98,7 @@ class OnePaceOrganizer:
         self.plex_retry_secs = utils.get_env("plex_retry_secs", 30)
         self.plex_retry_times = utils.get_env("plex_retry_times", 3)
         self.plex_set_show_edits = utils.get_env("plex_set_show_edits", True)
+        self.plex_scan_show_folder = utils.get_env("plex_scan_show_folder", True)
 
         self.progress_bar_func = None
         self.message_dialog_func = None
@@ -228,6 +229,9 @@ class OnePaceOrganizer:
             if "set_show_edits" in config["plex"] and config["plex"]["set_show_edits"] is not None:
                 self.plex_set_show_edits = config["plex"]["set_show_edits"]
 
+            if "scan_show_folder" in config["plex"] and config["plex"]["scan_show_folder"] is not None:
+                self.plex_scan_show_folder = config["plex"]["scan_show_folder"]
+
         if "mode" in config and config["mode"] is not None and isinstance(config["mode"], int):
             self.mode = config["mode"]
 
@@ -279,7 +283,8 @@ class OnePaceOrganizer:
                 },
                 "retry_secs": self.plex_retry_secs,
                 "retry_times": self.plex_retry_times,
-                "set_show_edits": self.plex_set_show_edits
+                "set_show_edits": self.plex_set_show_edits,
+                "scan_show_folder": self.plex_scan_show_folder
             }
         }
 
@@ -1085,6 +1090,10 @@ class OnePaceOrganizer:
                                 await utils.run(show.editOriginallyAvailable, str(tvshow["premiered"].isoformat()).split("T")[0])
                             else:
                                 await utils.run(show.editOriginallyAvailable, tvshow["premiered"])
+                
+                if self.plex_scan_show_folder:
+                    self.logger.info("Asking plex to scan folder")
+
 
             # Poster
             src = await utils.run(utils.find_from_list, self.base_path, [

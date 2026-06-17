@@ -298,6 +298,13 @@ class GUI(QMainWindow):
         self.action_edit_plex_url.triggered.connect(self.edit_plex_url)
         menu_configuration.addAction(self.action_edit_plex_url)
 
+        self.action_scan_show_folder = QAction("Tell Plex to scan the series folder before updating metadata", self)
+        self.action_scan_show_folder.setCheckable(True)
+        self.action_scan_show_folder.setChecked(self.organizer.plex_scan_show_folder)
+        self.action_scan_show_folder.setVisible(self.organizer.mode != 0)
+        self.action_scan_show_folder.triggered.connect(self.scan_show_folder)
+        menu_configuration.addAction(self.action_scan_show_folder)
+
         self.action_overwrite_nfo = QAction("Overwrite .nfo Files", self)
         self.action_overwrite_nfo.setCheckable(True)
         self.action_overwrite_nfo.setChecked(self.organizer.overwrite_nfo)
@@ -620,6 +627,7 @@ class GUI(QMainWindow):
         self.action_edit_plex_retry_secs.setVisible(plex_enabled)
         self.action_overwrite_nfo.setVisible(not plex_enabled)
         self.action_set_show.setVisible(plex_enabled)
+        self.action_scan_show_folder.setVisible(plex_enabled)
         self.output.setVisible(self.organizer.file_action != 4)
         self.input.label.setText(self.input_metadata_str if self.organizer.file_action == 4 else self.input_nometadata_str)
         self.input.setVisible(self.organizer.file_action != 4 if plex_enabled else True)
@@ -1224,6 +1232,10 @@ class GUI(QMainWindow):
     def set_show_edits(self):
         self.organizer.plex_set_show_edits = not self.organizer.plex_set_show_edits
         self.action_set_show.setChecked(self.organizer.plex_set_show_edits)
+
+    def scan_show_folder(self):
+        self.organizer.plex_scan_show_folder = not self.organizer.plex_scan_show_folder
+        self.action_scan_show_folder.setChecked(self.organizer.plex_scan_show_folder)
 
     @asyncSlot()
     async def start(self):
