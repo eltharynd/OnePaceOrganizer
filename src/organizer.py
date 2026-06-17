@@ -98,7 +98,7 @@ class OnePaceOrganizer:
         self.plex_retry_secs = utils.get_env("plex_retry_secs", 30)
         self.plex_retry_times = utils.get_env("plex_retry_times", 3)
         self.plex_set_show_edits = utils.get_env("plex_set_show_edits", True)
-        self.plex_scan_show_folder = utils.get_env("plex_scan_show_folder", True)
+        self.plex_scan_show_folder = utils.get_env("plex_scan_show_folder", False)
 
         self.progress_bar_func = None
         self.message_dialog_func = None

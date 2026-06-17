@@ -1146,10 +1146,12 @@ class GUI(QMainWindow):
         self.plex_status.prop.setText(self.plex_status_text())
 
     @asyncClose
-    async def exit(self, event=None):
+    async def closeEvent(self, event):
         await self.organizer.save_config()
-        if event is None:
-            self.close()
+        event.accept()
+
+    def exit(self):
+        self.close()  # delegates to closeEvent above
 
     def set_action(self, action):
         self.organizer.file_action = action
@@ -1355,8 +1357,9 @@ class GUI(QMainWindow):
 def main(organizer, log_level):
     try:
         app = QApplication(sys.argv)
-        close_event = asyncio.Event()
-        app.aboutToQuit.connect(close_event.set)
+
+        loop = QEventLoop(app)
+        asyncio.set_event_loop(loop)
 
         async def _run():
             await organizer.load_config()
@@ -1364,7 +1367,7 @@ def main(organizer, log_level):
             gui = GUI(organizer, log_level)
             gui.setWindowTitle(organizer.window_title)
 
-            if "gui_maximized" in organizer.extra_fields and isinstance(organizer.extra_fields["gui_maximized"], bool) and organizer.extra_fields["gui_maximized"]:
+            if organizer.extra_fields.get("gui_maximized") is True:
                 gui.showMaximized()
             else:
                 gui.show()
@@ -1372,27 +1375,23 @@ def main(organizer, log_level):
             is_latest, latest_vers = await utils.run(utils.is_up_to_date, organizer.toml["version"], organizer.base_path)
             if not is_latest:
                 do_update = await asyncWrap(
-                    QMessageBox.question(
+                    lambda: QMessageBox.question(
                         None,
-                        self.organizer.window_title,
-                        "There is a newer version of this application. Do you wish to open up " +
-                        "GitHub in order to download the new version?" +
-                        "\n\n" +
-                        f"Installed: v{organizer.toml['version']}\n" +
+                        organizer.window_title,
+                        "There is a newer version of this application. Do you wish to open up "
+                        "GitHub in order to download the new version?"
+                        "\n\n"
+                        f"Installed: v{organizer.toml['version']}\n"
                         f"Latest: v{latest_vers}"
                     ) == QMessageBox.StandardButton.Yes
                 )
-
                 if do_update:
                     await utils.run(webbrowser.open_new_tab, "https://github.com/ladyisatis/OnePaceOrganizer/releases/latest")
 
-            await close_event.wait()
+        with loop:
+            loop.run_until_complete(_run())
+            loop.run_forever()  # keeps running until app.quit() / window close exits the loop
 
-        asyncio.run(_run(), loop_factory=QEventLoop)
-
-    except:
+    except Exception:
         print(traceback.format_exc())
         QMessageBox.critical(None, organizer.window_title, traceback.format_exc())
-
-    finally:
-        asyncio.run(organizer.save_config())
