@@ -298,13 +298,6 @@ class GUI(QMainWindow):
         self.action_edit_plex_url.triggered.connect(self.edit_plex_url)
         menu_configuration.addAction(self.action_edit_plex_url)
 
-        self.action_scan_show_folder = QAction("Tell Plex to scan the series folder before updating metadata", self)
-        self.action_scan_show_folder.setCheckable(True)
-        self.action_scan_show_folder.setChecked(self.organizer.plex_scan_show_folder)
-        self.action_scan_show_folder.setVisible(self.organizer.mode != 0)
-        self.action_scan_show_folder.triggered.connect(self.scan_show_folder)
-        menu_configuration.addAction(self.action_scan_show_folder)
-
         self.action_overwrite_nfo = QAction("Overwrite .nfo Files", self)
         self.action_overwrite_nfo.setCheckable(True)
         self.action_overwrite_nfo.setChecked(self.organizer.overwrite_nfo)
@@ -347,6 +340,13 @@ class GUI(QMainWindow):
         self.action_edit_plex_retry_secs.setVisible(self.organizer.mode != 0)
         self.action_edit_plex_retry_secs.triggered.connect(self.edit_plex_retry_secs)
         menu_advanced.addAction(self.action_edit_plex_retry_secs)
+
+        self.action_scan_show_folder = QAction("(Plex) Scan Library after move/copy", self)
+        self.action_scan_show_folder.setCheckable(True)
+        self.action_scan_show_folder.setChecked(self.organizer.plex_scan_show_folder)
+        self.action_scan_show_folder.setVisible(self.organizer.mode != 0)
+        self.action_scan_show_folder.triggered.connect(self.scan_show_folder)
+        menu_advanced.addAction(self.action_scan_show_folder)
 
         action_edit_workers = QAction("Edit Number of Workers", self)
         action_edit_workers.triggered.connect(self.edit_workers)
