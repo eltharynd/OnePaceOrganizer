@@ -1091,10 +1091,6 @@ class OnePaceOrganizer:
                             else:
                                 await utils.run(show.editOriginallyAvailable, tvshow["premiered"])
                 
-                if self.plex_scan_show_folder:
-                    self.logger.info("Asking plex to scan folder")
-
-
             # Poster
             src = await utils.run(utils.find_from_list, self.base_path, [
                 ("posters", "poster.*"),
@@ -1245,7 +1241,17 @@ class OnePaceOrganizer:
         plex_episode = None
 
         try:
+            data_file = Path(self.base_path, "metadata", "data.db")
+            if await utils.is_file(data_file):
+                await self.open_db(data_file)
+
             section = await utils.run(self.plexapi_server.library.sectionByID, int(self.plex_config_library_key))
+
+            if self.plex_scan_show_folder:
+                self.logger.info(f"Triggering Plex Library Scan")
+                section.update()
+                self.logger.debug(f"Waiting 5 seconds for library update to finish")
+                await asyncio.sleep(5)
 
             self.logger.trace(f"Looking up show with GUID: {self.plex_config_show_guid}")
             if self.plex_config_show_guid.startswith("local://"):
